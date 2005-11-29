@@ -1,0 +1,4 @@
+computeOutlier          Computes outlier probes
+computeSFandSDT         Compute SF and SDT values
+SScore                  Compute S-Score values
+SScoreBatch             Compute S-Score values

@@ -1,0 +1,385 @@
+% -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
+%\VignetteIndexEntry{SScore primer}
+%\VignetteKeywords{Analysis, Affymetrix}
+%\VignetteDepends{sscore, affy}
+%\VignettePackage{sscore}
+%documentclass[12pt, a4paper]{article}
+\documentclass[12pt]{article}
+
+\usepackage{amsmath,pstricks}
+\usepackage{hyperref}
+\usepackage[authoryear,round]{natbib}
+
+\textwidth=6.2in
+\textheight=8.5in
+%\parskip=.3cm
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-.3in
+
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+
+\author{Richard E. Kennedy, Kellie J. Archer, Robnet T. Kerns, and Michael F. Miles}
+\begin{document}
+\title{Description of S-Score: Expression Analysis of Affymetrix GeneChips from Probe-Level Data}
+
+\maketitle
+\tableofcontents
+\newpage
+\section{Introduction}
+The S-Score algorithm described by \cite{zhang2002} and \cite{kerns2003} is a novel 
+comparative method for gene expression data analysis that performs tests of 
+hypotheses directly from probe level data. It is based on a new error model 
+in which the detected signal is assumed to be proportional to the probe pair 
+signal for highly expressed genes, but assumed to approach a background 
+level (rather than 0) for genes with low levels of expression. This model is 
+used to calculate relative change in probe pair intensities that converts 
+probe signals into multiple measurements with equalized errors, which are 
+summed over a probe set to form the significance score (S-Score). Assuming 
+no expression differences between chips, the S-Score follows a standard 
+normal distribution. Thus, p-values can be easily calculated from the 
+S-Score, and a separate step estimating the probe set expression summary 
+values is not needed. Furthermore, in comparisons of dilution and spike-in 
+microarray datasets, the S-Score demonstrated greater sensitivity than many 
+existing methods, without sacrificing specificity. The \Rpackage{sscore} package implements 
+the S-Score algorithm in the R programming environment, making it available 
+to users of the Bioconductor\footnote{\url{http://www.bioconductor.org/}} project.
+
+\section{Reading in data and generating S-Scores}
+Affymetrix data are generated from GeneChips$^{TM}$ by analyzing the scanned 
+image of the chip (stored in a *.DAT file) to produce a *.CEL file. The 
+*.CEL file contains, among other information, a decimal number for each 
+probe on the chip that corresponds to its intensity. The S-Score algorithm 
+compares two GeneChips by combining all of the probe intensities from a 
+probeset (typically 11 to 20) into a single summary statistic for each gene. 
+The \Rpackage{sscore} package processes the data obtained from *.CEL files, which must be 
+loaded into R prior to calling the \Rfunction{SScore} function. Thus, the typical sequence of 
+steps to accomplish this is as follows:
+
+\begin{enumerate}
+\item Create a directory containing all *.CEL files relevant to the planned analysis.
+\item If using Linux / Unix, start R in that directory.
+\item If using the Rgui for Microsoft Windows, make sure your working directory contains the *.CEL files (use ``File -> Change Dir'' menu item).
+
+\item Load the library.
+
+<<results=hide>>=
+library(sscore)
+@
+
+\item Read in the data and create an expression set.
+
+\end{enumerate}
+
+Both of the functions \Rfunction{SScore} and \Rfunction{SScoreBatch} operate on an \Robject{AffyBatch} object
+containing all of the relevant information from the *.CEL files. Additional information regarding the \Rfunction{ReadAffy}
+function and detailed description of the structure of *.CEL files can be found in the \Rpackage{affy} vignette.
+Note that, even though the intensities have been loaded into R, \Rfunction{SScore} will still need direct access to
+the *.CEL files later to obtain the information about outliers. {\bf The current working 
+directory should have a copy of the *.CEL files whenever } \Rfunction{SScore} {\bf is called; if the working directory is 
+changed, an error may result.}
+
+The \Rfunction{SScore} and \Rfunction{SScoreBatch} functions return an object of class \Robject{exprSet}. (The class \Robject{exprSet} is described in the \Rpackage{Biobase} vignette.) The S-Score 
+values are returned in the \Robject{exprs} slot.  The \Robject{se.exprs} slot contains the CorrDiff
+values, which represent the correlation of each probe on the first chip with the corresponding
+probe on the second chip.
+
+The following examples illustrate the \Rpackage{sscore} package with the results of the S-Score 
+analysis for the \Robject{affybatch.example} data set included with the \Rpackage{affy} package.  
+Prior to analyzing \Robject{affybatch.example}, the data files 20A, 20B, and 10A should be copied into
+the current working directory.  (These files are found in the $\backslash$inst$\backslash$doc directory of the \Rpackage{sscore}
+package, and are *.CEL files corresponding to the data in the \Robject{affybatch.example} data set.)
+
+A basic S-Score analysis without any optional parameters is generated using the commands:
+
+<<results=hide>>= 
+data(affybatch.example)  ## get the example data
+cel <- affybatch.example[,c(1,2)] ## only need the first 2 columns
+## copy the files 20A, 20B, and 10A into the  current working
+## directory prior to executing the next command
+SScore.basic <- SScore(cel)
+@ 
+
+and the first few S-Score values are
+
+<<>>= 
+exprs(SScore.basic)[1:20]
+@
+
+Optional parameters for \Rfunction{SScore} include:
+
+\begin{description}
+\item[SF, SDT] -- the Scale Factor and Standard Difference Threshold. Each is a 
+vector with length equal to the number of columns in the AffyBatch object, 
+and contains a numeric value for each chip. The Scale Factor is used to 
+scale each intensity to a target background value, with the default of 500 (as used by the 
+Affymetrix GeneChip Operating Software [GCOS]). The Standard Difference 
+Threshold is used as an estimate of background noise, and is equal to the 
+standard deviation for the lowest 2\% of intensities on a chip. These 
+values are available from the Affymetrix GCOS output, or may be calculated 
+by the \Rfunction{SScore} function.
+
+An example of an S-Score analysis in which SF and SDT were specified is
+
+<<results=hide>>= 
+data(affybatch.example)
+cel <- affybatch.example[,c(1,2)]
+SScore.sfsdt <- SScore(cel,SF=c(22.24,25.49),SDT=c(2526.300,2590.297))
+@ 
+
+and the first few S-Score values are
+
+<<>>= 
+exprs(SScore.sfsdt)[1:20]
+@
+
+\item[rm.outliers, rm.mask, rm.extra] -- These are logical values used to 
+exclude certain probes from the S-Score calculations. These options perform 
+the same as they do in the \Rfunction{ReadAffy} function, which it calls. \verb+rm.outliers+ 
+excludes all probes designated as outliers in the *.CEL file. 
+\verb+rm.mask+ excludes all probes designated as masked in the *.CEL file. 
+\verb+rm.extra+ removes both outlier and mask probes, and overrides 
+\verb+rm.outliers+ and \verb+rm.mask+ if these are specified.
+
+An example of an S-Score analysis in which outliers were included is
+
+<<results=hide>>= 
+data(affybatch.example)
+cel <- affybatch.example[,c(1,2)]
+SScore.outliers <- SScore(cel,rm.outliers=FALSE,
+   rm.mask=FALSE)
+@ 
+
+and the first few S-Score values are
+
+<<>>= 
+exprs(SScore.outliers)[1:20]
+@
+
+\item[digits] -- a numeric value that specifies the number of significant 
+decimal places for the S-Score and CorrDiff values, which are rounded as 
+needed. The default uses full precision with no rounding. The output from 
+the stand-alone version of the S-Score uses \verb+digits=3+.
+
+The example \Robject{SScore.digits} contains the results of a S-Score analysis in which only 3 
+significant digits were retained:
+
+<<results=hide>>= 
+data(affybatch.example)
+cel <- affybatch.example[,c(1,2)]
+SScore.digits <- SScore(cel,digits=3)
+@ 
+
+and the first few S-Score values are
+
+<<>>= 
+exprs(SScore.digits)[1:28]
+@
+
+\item[verbose] -- a logical value indicating whether additional 
+information on the analyses is printed. This includes the chip type, sample 
+names, values of alpha and gamma, and the SF and SDT values:
+
+<<>>= 
+data(affybatch.example)
+cel <- affybatch.example[,c(1,2)]
+SScore.sfsdt <- SScore(cel,SF=c(22.24,25.49),SDT=c(2526.300,2751.634),
+   verbose=TRUE)
+@
+
+\end{description}
+\section{Multiple pairwise comparisons}
+
+The \Rfunction{SScore} function calculates the S-Score values for one pair of chips (i.e. a 
+single two-chip comparison). However, for many experiments, several chips 
+need to be compared. This can be done using the \Rfunction{SScoreBatch} function, which automates 
+the process of making several two-chip comparisons. The setup and options 
+for \Rfunction{SScoreBatch} are very similar to \Rfunction{SScore}.
+
+The \Rfunction{SScoreBatch} function has an additional parameter, the \Robject{compare} matrix, which specifies the 
+pairs of chips to compare. It is an N x 2 matrix, where N is the number of 
+comparisons being made. Each row contains the column number of the chips in 
+the \Robject{AffyBatch} object that are being compared. For example, if the \Robject{compare} matrix is set up as
+
+\begin{verbatim}
+      [1,]  [2,] 
+[,1]     2     5 
+[,2]     2     6 
+[,3]     5     9 
+[,4]    10     2 
+[,5]     5     7 
+[,6]    10     8 
+[,7]     9     4 
+[,8]     1     2 
+[,9]     3    10 
+\end{verbatim}
+
+The first comparison made is between the chips in columns 2 and 5 of the 
+\Robject{AffyBatch} object; the second comparison made is between the chips in columns 2 and 6; 
+the third comparison made is between the chips in columns 5 and 9; and so 
+forth. If the \Robject{compare} matrix has more than two columns, only the first two columns 
+will be used for identifying the GeneChips in the \Robject{AffyBatch} object to be compared.
+
+Each column of \Robject{eset} will contain the results of a single two-chip comparison. 
+The first column of \Robject{eset} will contain the comparison corresponding to the first 
+row of the \Robject{compare} matrix, the second column of \Robject{eset} will contain the comparison 
+corresponding to the second row of the \Robject{compare} matrix, and so forth.
+
+A basic S-Score analysis using \Rfunction{SScoreBatch} is generated using the commands:
+
+<<results=hide>>= 
+data(affybatch.example)
+compare <- matrix(c(1,2,1,3,2,3),ncol=2,byrow=TRUE)
+SScoreBatch.basic <- SScoreBatch(affybatch.example,compare=compare)
+@ 
+
+and the first few S-Score values are
+
+<<>>=
+exprs(SScoreBatch.basic)[1:10,] 
+@
+
+The example \Robject{SScoreBatch.sfsdt} contains the results of an analysis in which the SF and SDT 
+values were specified
+
+<<results=hide>>= 
+data(affybatch.example)
+compare <- matrix(c(1,2,1,3,2,3),ncol=2,byrow=TRUE)
+SScoreBatch.sfsdt <- SScoreBatch(affybatch.example,compare=compare,
+   SF=c(22.24,25.49,25.56),SDT=c(2526.300,2590.297,2751.634))
+@ 
+
+and the first few S-Score values are
+
+<<>>= 
+exprs(SScoreBatch.sfsdt)[1:10,]
+@
+
+Other parameters for \Rfunction{SScoreBatch} are identical to \Rfunction{SScore}.
+
+\section{Using S-Scores in gene expression analysis}
+Under conditions of no differential expression, the S-Scores follow a 
+standard normal (Gaussian) distribution with a mean of 0 and standard 
+deviation of 1. This makes it straightforward to calculate p-values 
+corresponding to rejection of the null hypothesis and acceptance of the 
+alternative hypothesis of differential gene expression. Cutoff values for 
+the S-Scores can be set to achieve the desired level of significance. As an 
+example, an absolute S-Score value of 3 (signifying 3 standard deviations 
+from the mean, a typical cutoff value) would correspond to a p-value of 
+0.003. Under this scenario, the significant genes can be found as:
+
+<<>>= 
+sscores <- exprs(SScore.basic) ## extract the S-Score values
+signif <- geneNames(affybatch.example)[abs(sscores) >= 3]
+                        ## find those greater than 3 SD
+@ 
+
+Similarly, the p-values can be calculated as:
+
+<<>>= 
+sscores <- exprs(SScore.basic) ## extract the S-Score values
+p.values.1 <- 1 - pnorm(abs(sscores)) ## find the corresponding
+                        ## one-sided p-values
+p.values.2 <- 2*(1 - pnorm(abs(sscores))) ## find the corresponding
+                        ## two-sided p-values
+@ 
+
+The S-Score algorithm does account for the correlations among probes within 
+a two-chip comparison. However, it does not adjust p-values for multiple 
+comparisons when comparing more than one pair of chips.
+
+\section{Computing scale factor and statistical difference threshold}
+The \Rfunction{SScore} and \Rfunction{SScoreBatch} functions call the function \Rfunction{computeSFandSDT} 
+to compute the values for the Scale Factor (SF) and Statistical Difference Threshold (SDT) if these are not 
+supplied by the user. \Rfunction{computeSFandSDT} is an internal function that generally will not 
+be called or modified. 
+
+The calculations for the SF and SDT are performed as described in the Affymetrix Statistical Algorithms
+Description Document \citep{affy:tech:2002} and implemented in the Affymetrix (using SDT = 4 * RawQ * SF).  The calculation
+of these values can be both time- and memory-intensive; it is recommended that the user supply
+these values from the Affymetrix MAS5 or GCOS Metrics table whenever possible.  Alternatively, \Rfunction{computeSFandSDT}
+may be called directly to obtain the SF and SDT values for each *.CEL file, which are then supplied
+by the user in subsequent calls to \Rfunction{SScore}.  The calculations for each *.CEL file
+are independent.  If memory is not sufficient to allow computation of all SF and SDT values simultaneously,
+the *.CEL files may be broken into smaller batches; identical results will be obtained either way. 
+
+In addition to computing the specified values, \Rfunction{computeSFandSDT} may be used to generate 
+histograms of the log intensities for the chips being compared. Such plots 
+are useful for identifying potentially problematic chips prior to analysis.  It may also be used to display
+additional information about the *.CEL file parameters. 
+The options for \Rfunction{computeSFandSDT} are
+
+\begin{description}
+\item[TGT] -- a numeric value for the target intensity to which the arrays should be scaled.
+
+\item[verbose] -- a logical value indicating whether additional 
+information on the calculations is printed. This includes the SF, SDT, and RawQ values,
+as well as descriptive statistics on the background and noise.  This is similar to the
+information provided by the Affymetrix GCOS Metrics table for the *.CEL file.
+
+\item[plot.histogram] -- a logical value indicating whether a histogram 
+should be plotted. Both the PM and MM log intensities will be shown in a 
+single graphics window. Separate plots will be generated for each chip being 
+analyzed.
+
+\item[digits] -- a numeric value that specifies the number of 
+significant decimal places for the SF and SDT values, which are rounded as 
+needed. Using \verb+digits=3+ rounds to the same number of digits as the 
+stand-alone version of the S-Score. 
+\end{description}
+
+\section{Identifying outliers}
+The \Rfunction{SScore} and \Rfunction{SScoreBatch} functions call the function \Rfunction{computeOutlier} 
+to flag probes as outliers that should be excluded from the S-Score calculation. This is an internal 
+function that generally will not be called or modified, but may be altered if necessary to meet specific 
+needs. The \Rfunction{computeOutlier} function is called if the \verb+rm.outliers+, \verb+rm.mask+, 
+or \verb+rm.extra+ parameters of \Rfunction{SScore} or \Rfunction{SScoreBatch} are set to \verb+TRUE+. As 
+currently implemented, these parameters work as described in the \Rpackage{affy} documentation since they 
+are passed to the \Rfunction{ReadAffy} function to identify outlier and mask probes. The return value from 
+\Rfunction{computeOutlier} is a logical matrix the same size and order as the intensity matrix for the 
+\Robject{AffyBatch} object. Each cell of the logical matrix contains a \verb+TRUE+ value if the 
+corresponding intensity is identified as an outlier and excluded from the S-Score calculation; otherwise it 
+contains \verb+FALSE+. By changing the \Rfunction{computeOutlier }function, you may create additional features
+not currently available, such as removing modified probes.
+
+\section{Changes from the stand-alone version}
+The S-Score algorithm has been previously implemented as a stand-alone 
+executable for the Windows operating system, using Borland Delphi. This 
+version has been available from the Miles Laboratory website at \url{http://www.brainchip.vcu.edu/expressionda.htm}. Users 
+of the stand-alone version will notice small differences in results compared to the \Rpackage{sscore} package as 
+it is implemented in R, though these should not significantly affect inferences regarding gene expression. The 
+following lists identifies differences between the two implementations:
+
+\begin{enumerate}
+\item The stand-alone version excludes outlier, masked, and modified intensities from calculations when using *.CEL 
+files. When using *.CSV files, the stand-alone program also excludes outlier, masked, and modified 
+intensities {\it if the corresponding *.CEL file is present for obtaining this information}. (The *.CSV file does 
+not contain any information about which intensities are outlier, masked, or modified.) The default for the R package 
+is {\it not} to exclude outlier, masked, or modified intensities, though this may be changed using various options. Note 
+that, due to the way the \Rpackage{affy} package is implemented, it is not possible to exclude modified intensities 
+using the \Rpackage{sscore} package.
+\item The rounding methods are not identical for Borland Delphi and R, which can lead to slight differences in 
+calculations. The difference is negligible for most of the S-Score calculations, and should be less than or equal to 0.001.
+\item The SF and SDT calculations in the stand-alone version are performed using an independently developed algorithm.  The 
+original C++ version uses natural logarithms, while the Delphi version uses base 10 logarithm.  The \Rpackage{sscore} package 
+uses a ported version of the Affymetrix algorithms described on the Affymetrix website \url{http://www.affymetrix.com} under 
+Support -> Developer's Network -> Open Source -> MAS5 Stat SDK.  Base 2 logarithms are used for these calculations.
+\end{enumerate}
+
+A Java version of the S-Score algorithm is also under development.  Differences between the Java version
+and the \Rpackage{sscore} package will be included after the Java version is released.
+
+\section{Acknowledgements}
+The development of the S-Score algorithm and its original implementation in 
+C++ is the work of Dr. Li Zhang. The Delphi implementation of the S-Score algorithm is 
+the work of Dr. Robnet Kerns.  This work was partly supported by NLM F37 training grant 
+LM008728 to Richard E. Kennedy and NIAAA research grant AA13678 to Michael F. Miles.
+
+\bibliographystyle{plainnat}
+\bibliography{sscore}
+
+\end{document}
