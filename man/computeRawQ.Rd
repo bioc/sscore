@@ -5,7 +5,7 @@
   Computes the RawQ value of a single Affymetrix GeneChip
 }
 \usage{
-computeRawQ(fname, intensity, probe.index, probe.zoneID, bgCells, NumberZones)
+computeRawQ(fname, intensity, probe.index, probe.zoneID, bgCells, NumberZones, celfile.path = NULL)
 }
 \arguments{
   \item{fname}{ character string with the filename of the GeneChip }
@@ -14,6 +14,7 @@ computeRawQ(fname, intensity, probe.index, probe.zoneID, bgCells, NumberZones)
   \item{probe.zoneID}{ vector of zone ID numbers for each probe }
   \item{bgCells}{ number of background cells for the GeneChip }
   \item{NumberZones}{ number of zones on the GeneChip }
+  \item{celfile.path}{ character denoting the path for the *.CEL files specified in \code{fname} }
 }
 \details{
   Calculates RawQ using the algorithms described in the Affymetrix Statistical Algorithms

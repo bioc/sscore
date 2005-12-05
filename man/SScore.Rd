@@ -7,7 +7,7 @@
 \usage{
 SScore(afbatch, SF = NULL, SDT = NULL, 
        rm.outliers = TRUE, rm.mask = TRUE, rm.extra = TRUE, 
-       digits = NULL, verbose = FALSE)
+       digits = NULL, verbose = FALSE, celfile.path = NULL)
 }
 \arguments{
   \item{afbatch}{ An \code{AffyBatch} object }
@@ -18,6 +18,7 @@ SScore(afbatch, SF = NULL, SDT = NULL,
   \item{rm.extra}{ if \code{TRUE}, overrides what is in \code{rm.mask} and \code{rm.outliers} }
   \item{digits}{ number of significant digits for S-Score values }
   \item{verbose}{ logical value. If \code{TRUE} it provides more detail of the S-Score calculations. }
+  \item{celfile.path}{ character denoting the path for the *.CEL files corresponding to \code{afbatch} }
 }
 \details{
   Computes S-Score values as described by Zhang et al. (2002).  \code{SScore} provides a simpler

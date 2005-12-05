@@ -6,7 +6,7 @@
   of Affymetrix GeneChips, for use in calculating S-Score values
 }
 \usage{
-computeSFandSDT(afbatch, TGT = 500, digits = NULL, verbose = FALSE, plot.histogram = FALSE)
+computeSFandSDT(afbatch, TGT = 500, digits = NULL, verbose = FALSE, plot.histogram = FALSE, celfile.path = NULL)
 }
 \arguments{
   \item{afbatch}{ An \code{AffyBatch} object }
@@ -14,6 +14,7 @@ computeSFandSDT(afbatch, TGT = 500, digits = NULL, verbose = FALSE, plot.histogr
   \item{digits}{ number of significant digits for SF and SDT values }
   \item{verbose}{ logical value. If \code{TRUE} it provides more detail of the SF and SDT calculations. }
   \item{plot.histogram}{ logical value.  if \code{TRUE} it plots a histogram of intensities }
+  \item{celfile.path}{ character denoting the path for the *.CEL files corresponding to \code{afbatch} }
 }
 \details{
   Calculates SF and SDT factors using the algorithms described in the Affymetrix Statistical

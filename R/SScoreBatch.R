@@ -1,7 +1,7 @@
 SScoreBatch <- function(afbatch = stop("No CEL files specified"),
  compare =  stop("No list of comparisons given"),  SF = NULL,SDT =
  NULL, rm.outliers = TRUE,rm.mask = TRUE, rm.extra = TRUE, digits = 
- NULL,verbose = FALSE) {
+ NULL,verbose = FALSE,celfile.path= NULL) {
 #######################################################################
 #
 # This function computes the S-Score values for multiple probe sets in
@@ -43,6 +43,9 @@ SScoreBatch <- function(afbatch = stop("No CEL files specified"),
 #                returning S-Score values
 #	verbose  - logical value indicating whether additional informa-
 #                  tion on the calculations should be displayed
+#       celfile.path - character string giving the directory path to
+#                      the *.CEL files being read, or NULL if the *.CEL
+#                      files are in the current directory
 #
 # Value:
 #	an object of class ExprSet, with the exprs slot containing the
@@ -62,7 +65,7 @@ SScoreBatch <- function(afbatch = stop("No CEL files specified"),
 # calculate SF and SDT, if not specified by the user, as these must
 # always be available
 	if (is.null(SF) | is.null(SDT))
-		sfsdtlist <- computeSFandSDT(afbatch,digits=3)
+		sfsdtlist <- computeSFandSDT(afbatch,digits=3,celfile.path=celfile.path)
 
 	if (is.null(SF))
 		SF <- sfsdtlist$SF
@@ -80,7 +83,7 @@ SScoreBatch <- function(afbatch = stop("No CEL files specified"),
 
 # calculate the outlier matrix, if excluding outliers / masked values
 	if (any(rm.outliers,rm.mask,rm.extra))
-		outlier <- computeOutlier(afbatch,rm.outliers=rm.outliers,rm.mask=rm.mask,rm.extra=rm.extra)
+		outlier <- computeOutlier(afbatch,rm.outliers=rm.outliers,rm.mask=rm.mask,rm.extra=rm.extra,celfile.path=celfile.path)
 
 #######################################################################
 # initialize variables needed in later calculations.  For the PM/MM

@@ -1,4 +1,5 @@
-computeOutlier <- function(afbatch,rm.mask = TRUE, rm.outliers = TRUE, rm.extra = TRUE) {
+computeOutlier <- function(afbatch,rm.mask = TRUE, rm.outliers = TRUE, rm.extra = TRUE,
+  celfile.path = NULL) {
 #######################################################################
 #
 # Arguments:
@@ -10,6 +11,9 @@ computeOutlier <- function(afbatch,rm.mask = TRUE, rm.outliers = TRUE, rm.extra 
 #                  values.  If rm.extra = TRUE, it overrides the values
 #                  of rm.outliers and rm.mask.  Works identically to
 #                  these parameters in ReadAffy(), which it calls
+#       celfile.path - character string giving the directory path to
+#                      the *.CEL files being read, or NULL if the *.CEL
+#                      files are in the current directory
 #
 # Value:
 #	a matrix containing the list of outliers / masked values for
@@ -41,7 +45,7 @@ computeOutlier <- function(afbatch,rm.mask = TRUE, rm.outliers = TRUE, rm.extra 
 # done because the ReadAffy() function returns NAs for the outliers, so
 # we cannot access the values of outliers in later calculations
 # otherwise
-	cel <- ReadAffy(filenames=filenames,rm.mask=rm.mask,rm.outliers=rm.outliers,rm.extra=rm.extra)
+	cel <- ReadAffy(filenames=filenames,rm.mask=rm.mask,rm.outliers=rm.outliers,rm.extra=rm.extra,celfile.path=celfile.path)
 
 # set up the outlier matrix with TRUE/FALSE values
 	outlier <- is.na(intensity(cel))

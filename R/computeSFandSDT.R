@@ -1,5 +1,5 @@
 computeSFandSDT <- function(afbatch,TGT=500, digits=NULL,verbose=FALSE,
- plot.histogram=FALSE) {
+ plot.histogram=FALSE,celfile.path=NULL) {
 #######################################################################
 #
 # This function computes the scaling factor (SF) and statistical
@@ -16,6 +16,9 @@ computeSFandSDT <- function(afbatch,TGT=500, digits=NULL,verbose=FALSE,
 #                 information on the calculations should be displayed
 #       plot.histogram - logical value indicating whether plots of the
 #                        histograms should be displayed
+#       celfile.path - character string giving the directory path to
+#                      the *.CEL files being read, or NULL if the *.CEL
+#                      files are in the current directory
 #
 # Value:
 #       a list containing the components SF (scaling factor values, one
@@ -92,8 +95,8 @@ computeSFandSDT <- function(afbatch,TGT=500, digits=NULL,verbose=FALSE,
 # calculate the rawQ for each *.CEL file
 	fname <- sampleNames(afbatch)
 	if (length(fname) > 1) 
-		rawQ <- sapply(1:length(fname),function(x) computeRawQ(fname[x],intens[,x],probe.index,probe.zoneID,bgCells,NumberZones)) else
-		rawQ <- computeRawQ(fname,intens,probe.index,probe.zoneID,bgCells,NumberZones)
+		rawQ <- sapply(1:length(fname),function(x) computeRawQ(fname[x],intens[,x],probe.index,probe.zoneID,bgCells,NumberZones,celfile.path)) else
+		rawQ <- computeRawQ(fname,intens,probe.index,probe.zoneID,bgCells,NumberZones,celfile.path)
 
 # compute the zone information (background and noise for each zone)
 	ZoneI <- intens[probe.index,]

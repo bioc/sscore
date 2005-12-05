@@ -79,9 +79,8 @@ Both of the functions \Rfunction{SScore} and \Rfunction{SScoreBatch} operate on 
 containing all of the relevant information from the *.CEL files. Additional information regarding the \Rfunction{ReadAffy}
 function and detailed description of the structure of *.CEL files can be found in the \Rpackage{affy} vignette.
 Note that, even though the intensities have been loaded into R, \Rfunction{SScore} will still need direct access to
-the *.CEL files later to obtain the information about outliers. {\bf The current working 
-directory should have a copy of the *.CEL files whenever } \Rfunction{SScore} {\bf is called; if the working directory is 
-changed, an error may result.}
+the *.CEL files later to obtain the information about outliers. {\bf If a copy of the *.CEL files is not available when }
+\Rfunction{SScore} {\bf is called, an error may result.}
 
 The \Rfunction{SScore} and \Rfunction{SScoreBatch} functions return an object of class \Robject{exprSet}. (The class \Robject{exprSet} is described in the \Rpackage{Biobase} vignette.) The S-Score 
 values are returned in the \Robject{exprs} slot.  The \Robject{se.exprs} slot contains the CorrDiff
@@ -90,18 +89,17 @@ probe on the second chip.
 
 The following examples illustrate the \Rpackage{sscore} package with the results of the S-Score 
 analysis for the \Robject{affybatch.example} data set included with the \Rpackage{affy} package.  
-Prior to analyzing \Robject{affybatch.example}, the data files 20A, 20B, and 10A should be copied into
-the current working directory.  (These files are found in the $\backslash$inst$\backslash$doc directory of the \Rpackage{sscore}
-package, and are *.CEL files corresponding to the data in the \Robject{affybatch.example} data set.)
+These examples utilize the data files 20A, 20B, and 10A supplied with the \Rpackage{sscore} package,
+which are *.CEL files corresponding to the data in the \Robject{affybatch.example} data set.
 
 A basic S-Score analysis without any optional parameters is generated using the commands:
 
 <<results=hide>>= 
 data(affybatch.example)  ## get the example data
+## get the path to the directory with the files 20A, 20B, and 10A
+pathname <- system.file("doc",package="sscore")
 cel <- affybatch.example[,c(1,2)] ## only need the first 2 columns
-## copy the files 20A, 20B, and 10A into the  current working
-## directory prior to executing the next command
-SScore.basic <- SScore(cel)
+SScore.basic <- SScore(cel,celfile.path=pathname)
 @ 
 
 and the first few S-Score values are
@@ -113,6 +111,9 @@ exprs(SScore.basic)[1:20]
 Optional parameters for \Rfunction{SScore} include:
 
 \begin{description}
+\item[celfile.path] -- character string giving the directory in which the *.CEL files are stored.  If 
+a directory is not specified, the current working directory is used.
+
 \item[SF, SDT] -- the Scale Factor and Standard Difference Threshold. Each is a 
 vector with length equal to the number of columns in the AffyBatch object, 
 and contains a numeric value for each chip. The Scale Factor is used to 
@@ -127,8 +128,9 @@ An example of an S-Score analysis in which SF and SDT were specified is
 
 <<results=hide>>= 
 data(affybatch.example)
+pathname <- system.file("doc",package="sscore")
 cel <- affybatch.example[,c(1,2)]
-SScore.sfsdt <- SScore(cel,SF=c(22.24,25.49),SDT=c(2526.300,2590.297))
+SScore.sfsdt <- SScore(cel,SF=c(22.24,25.49),SDT=c(2526.300,2590.297),celfile.path=pathname)
 @ 
 
 and the first few S-Score values are
@@ -149,9 +151,10 @@ An example of an S-Score analysis in which outliers were included is
 
 <<results=hide>>= 
 data(affybatch.example)
+pathname <- system.file("doc",package="sscore")
 cel <- affybatch.example[,c(1,2)]
 SScore.outliers <- SScore(cel,rm.outliers=FALSE,
-   rm.mask=FALSE)
+   rm.mask=FALSE,celfile.path=pathname)
 @ 
 
 and the first few S-Score values are
@@ -170,8 +173,9 @@ significant digits were retained:
 
 <<results=hide>>= 
 data(affybatch.example)
+pathname <- system.file("doc",package="sscore")
 cel <- affybatch.example[,c(1,2)]
-SScore.digits <- SScore(cel,digits=3)
+SScore.digits <- SScore(cel,digits=3,celfile.path=pathname)
 @ 
 
 and the first few S-Score values are
@@ -186,9 +190,10 @@ names, values of alpha and gamma, and the SF and SDT values:
 
 <<>>= 
 data(affybatch.example)
+pathname <- system.file("doc",package="sscore")
 cel <- affybatch.example[,c(1,2)]
 SScore.sfsdt <- SScore(cel,SF=c(22.24,25.49),SDT=c(2526.300,2751.634),
-   verbose=TRUE)
+   verbose=TRUE,celfile.path=pathname)
 @
 
 \end{description}
@@ -233,8 +238,9 @@ A basic S-Score analysis using \Rfunction{SScoreBatch} is generated using the co
 
 <<results=hide>>= 
 data(affybatch.example)
+pathname <- system.file("doc",package="sscore")
 compare <- matrix(c(1,2,1,3,2,3),ncol=2,byrow=TRUE)
-SScoreBatch.basic <- SScoreBatch(affybatch.example,compare=compare)
+SScoreBatch.basic <- SScoreBatch(affybatch.example,compare=compare,celfile.path=pathname)
 @ 
 
 and the first few S-Score values are
@@ -248,9 +254,10 @@ values were specified
 
 <<results=hide>>= 
 data(affybatch.example)
+pathname <- system.file("doc",package="sscore")
 compare <- matrix(c(1,2,1,3,2,3),ncol=2,byrow=TRUE)
 SScoreBatch.sfsdt <- SScoreBatch(affybatch.example,compare=compare,
-   SF=c(22.24,25.49,25.56),SDT=c(2526.300,2590.297,2751.634))
+   SF=c(22.24,25.49,25.56),SDT=c(2526.300,2590.297,2751.634),celfile.path=pathname)
 @ 
 
 and the first few S-Score values are
@@ -330,6 +337,8 @@ analyzed.
 significant decimal places for the SF and SDT values, which are rounded as 
 needed. Using \verb+digits=3+ rounds to the same number of digits as the 
 stand-alone version of the S-Score. 
+
+\item[celfile.path] -- character string specifying the directory for *.CEL files
 \end{description}
 
 \section{Identifying outliers}

@@ -1,5 +1,5 @@
 computeRawQ <- function(fname,intensity,probe.index,probe.zoneID,
-  bgCells,NumberZones) {
+  bgCells,NumberZones,celfile.path = NULL) {
 #######################################################################
 #
 # This function computes the RawQ value of a single Affymetrix GeneChip
@@ -11,6 +11,9 @@ computeRawQ <- function(fname,intensity,probe.index,probe.zoneID,
 #       probe.zoneID - vector of zone ID numbers for each probe
 #       bgCells - number of background cells for the GeneChip
 #       NumberZones - number of zones on the GeneChip
+#       celfile.path - character string giving the directory path to
+#                      the *.CEL files being read, or NULL if the *.CEL
+#                      files are in the current directory
 #
 # Value:
 #	a numeric value corresponding to the RawQ value for the given
@@ -20,7 +23,10 @@ computeRawQ <- function(fname,intensity,probe.index,probe.zoneID,
 
 # read in the stdv and npixels column of the *.CEL file, which are not
 # stored in the AffyBatch object
-	ff <- file(fname)
+	if (is.null(celfile.path))
+		filename <- fname else
+		filename <- file.path(celfile.path,fname)
+	ff <- file(filename)
 	open(ff,"r")
 	dataline <- scan(ff,what=character(1),nmax=1,flush=TRUE,quiet=TRUE)
 	while (dataline != "[INTENSITY]")
