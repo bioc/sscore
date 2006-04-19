@@ -277,13 +277,17 @@ SScore <- function(afbatch = stop("No CEL files specified"),SF = NULL,
 	CorrDiff <- as.matrix(CorrDiff)
 	rownames(Score) <- rownames(CorrDiff) <- geneNames(afbatch)
 	colnames(Score) <- colnames(CorrDiff) <- paste(fn1,"vs",fn2)
+	comparison <- 1
+	Score.pData <- data.frame(comparison,row.names=colnames(Score))
+	ScorePheno <- new('phenoData', pData=Score.pData,
+	  varLabels=list(sample = "arbitrary numbering"))
 
 # put the values into an ExprSet to return.  The phenoData, annotation,
 # and description are the same as the AffyBatch object
 	eset <- new("exprSet",
 		exprs=Score,
 		se.exprs=CorrDiff,
-		phenoData=phenoData(afbatch),
+		phenoData=ScorePheno,
 		annotation=annotation(afbatch),
 		description=description(afbatch),
 		notes=notes(afbatch))
