@@ -250,7 +250,7 @@ SScore <- function(afbatch = stop("No CEL files specified"),SF = NULL,
 
 # output information on these parameters if desired by the user
 	if (verbose) {
-		Chip <- whatcdf(fn1)
+		Chip <- cdfName(afbatch)
 		num.probesets <- length(Score)
  		writeLines("S-score data. Parameter section:") 
  		writeLines(sprintf("Probearray type:      %s", Chip)) 

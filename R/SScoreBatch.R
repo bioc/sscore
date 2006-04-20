@@ -214,7 +214,7 @@ SScoreBatch <- function(afbatch = stop("No CEL files specified"),
 		if (verbose) {
 			fn1 <- sampleNames(afbatch)[idx1]
 			fn2 <- sampleNames(afbatch)[idx2]
-			chip <- whatcdf(fn1)
+			chip <- cdfName(afbatch)
 			num.probesets <- nrow(Score)
  			writeLines("S-score parameters:") 
  			writeLines(sprintf("Probearray type:      %s", chip)) 
