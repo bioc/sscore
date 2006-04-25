@@ -1,5 +1,5 @@
 Package: sscore
-Version: 1.2.1
+Version: 1.4.0
 Date: 2006-04-20
 Title: S-Score Algorithm for Affymetrix Oligonucleotide Microarrays
 Author: Richard Kennedy <rkennedy@vcu.edu>, based on C++
