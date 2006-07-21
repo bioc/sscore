@@ -241,7 +241,7 @@ SScoreBatch <- function(afbatch = stop("No CEL files specified"),
 	fnames <- sampleNames(afbatch)
 	dimnames(Score) <- list(geneNames(afbatch),paste(fnames[compare[,1]],"vs",fnames[compare[,2]]))
 	dimnames(CorrDiff) <- list(geneNames(afbatch),paste(fnames[compare[,1]],"vs",fnames[compare[,2]]))
-	comparison <- 1:length(fnames)
+	comparison <- 1:length(colnames(Score))
 	Score.pData <- data.frame(comparison,row.names=colnames(Score))
 	ScorePheno <- new('phenoData', pData=Score.pData,
 	  varLabels=list(sample = "arbitrary numbering"))
