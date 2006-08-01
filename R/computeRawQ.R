@@ -35,6 +35,7 @@ computeRawQ <- function(fname,intensity,probe.index,probe.zoneID,
 	numCells <- as.integer(unlist(strsplit(dataline,"="))[[2]])
 	dataline <- scan(ff,what=character(1),nmax=1,flush=TRUE,sep="\n",quiet=TRUE)
 	data <- scan(ff,what=list(NULL,NULL,NULL,stdv=0,npixels=0),nmax=numCells,flush=TRUE,quiet=TRUE)
+	close(ff)
 
 # find the noise for each zone
 	zonenoise <- tapply(probe.index,probe.zoneID,computeZonenoise,intensity,data$stdv,data$npixels,bgCells)
