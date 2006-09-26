@@ -1,4 +1,5 @@
 computeOutlier          Computes outlier probes
 computeSFandSDT         Compute SF and SDT values
+computeAffxSFandSDT		Compute SF and SDT values using affxparser routines
 SScore                  Compute S-Score values
 SScoreBatch             Compute S-Score values
