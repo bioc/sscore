@@ -1,5 +1,5 @@
 computeOutlier <- function(afbatch,rm.mask = TRUE, rm.outliers = TRUE, rm.extra = TRUE,
-  celfile.path = NULL) {
+  celfile.path = NULL,celfile.names = NULL) {
 #######################################################################
 #
 # Arguments:
@@ -38,7 +38,9 @@ computeOutlier <- function(afbatch,rm.mask = TRUE, rm.outliers = TRUE, rm.extra 
 #######################################################################
 
 # get the filenames corresponding to the AffyBatch object
-	filenames <- sampleNames(afbatch)
+	if (is.null(celfile.names))
+		filenames <- sampleNames(afbatch) else
+		filenames <- celfile.names
 	writeLines("Computing outliers")
 
 # read in the .CEL files again, omitting the outliers.  This has to be

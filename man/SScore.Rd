@@ -5,9 +5,9 @@
   Computes the S-Score values for a pair of Affymetrix GeneChips
 }
 \usage{
-SScore(afbatch, SF = NULL, SDT = NULL, 
+SScore(afbatch = stop("No CEL files specified"), SF = NULL, SDT = NULL, 
        rm.outliers = TRUE, rm.mask = TRUE, rm.extra = TRUE, 
-       digits = NULL, verbose = FALSE, celfile.path = NULL)
+       digits = NULL, verbose = FALSE, celfile.path = NULL, celfile.names = NULL)
 }
 \arguments{
   \item{afbatch}{ An \code{AffyBatch} object }
@@ -19,6 +19,7 @@ SScore(afbatch, SF = NULL, SDT = NULL,
   \item{digits}{ number of significant digits for S-Score values }
   \item{verbose}{ logical value. If \code{TRUE} it provides more detail of the S-Score calculations. }
   \item{celfile.path}{ character denoting the path for the *.CEL files corresponding to \code{afbatch} }
+  \item{celfile.names}{ optional character vector containing the names of the *.CEL files }
 }
 \details{
   Computes S-Score values as described by Zhang et al. (2002).  \code{SScore} provides a simpler

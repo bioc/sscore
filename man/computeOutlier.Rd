@@ -6,7 +6,7 @@
   that will be excluded from S-Score calculations
 }
 \usage{
-computeOutlier(afbatch, rm.mask = TRUE, rm.outliers = TRUE, rm.extra = TRUE, celfile.path = NULL)
+computeOutlier(afbatch, rm.mask = TRUE, rm.outliers = TRUE, rm.extra = TRUE, celfile.path = NULL, celfile.names = NULL)
 }
 \arguments{
   \item{afbatch}{ An \code{AffyBatch} object }
@@ -14,6 +14,7 @@ computeOutlier(afbatch, rm.mask = TRUE, rm.outliers = TRUE, rm.extra = TRUE, cel
   \item{rm.outliers}{ should the spots marked as 'OUTLIERS' be excluded from S-Score calculation? }
   \item{rm.extra}{ if \code{TRUE}, overrides what is in \code{rm.mask} and \code{rm.outliers} }
   \item{celfile.path}{ character denoting the path for the *.CEL files corresponding to \code{afbatch} }
+  \item{celfile.names}{ optional character vector containing the names of the *.CEL files }
 }
 \details{
   Computes the outlier and / or mask probes for an \code{AffyBatch} object.  These are
@@ -23,6 +24,8 @@ computeOutlier(afbatch, rm.mask = TRUE, rm.outliers = TRUE, rm.extra = TRUE, cel
   only mask values, or both.  The probes are be arranged in the same row order as
   the intensity values.  Note that this function assumes the *.CEL files are still available
   in the directory given by \code{celfile.path} (or the current directory if \code{celfile.path} is not specified).
+  The *.CEL names are given by \code{celfile.names}.  If \code{celfile.names} is not specified, the sample
+  names from the \code{AffyBatch} object will be used.
 }
 \value{
   a matrix containing the list of outliers / masked values for the given \code{AffyBatch} object.

@@ -1,6 +1,6 @@
 SScore <- function(afbatch = stop("No CEL files specified"),SF = NULL,
  SDT = NULL,rm.outliers = TRUE, rm.mask = TRUE, rm.extra = TRUE,
- digits = NULL, verbose = FALSE,celfile.path = NULL) {
+ digits = NULL, verbose = FALSE,celfile.path = NULL,celfile.names=NULL) {
 #######################################################################
 #
 # This function computes the S-Score values for each probeset in an
@@ -111,27 +111,52 @@ SScore <- function(afbatch = stop("No CEL files specified"),SF = NULL,
 	if (length(afbatch) > 2)
 		warning("More than two chips listed for comparison.  Only the first two will be used")
 
+	if (is.null(celfile.names))
+		fname <- sampleNames(afbatch) else
+		fname <- celfile.names
+	if (length(fname) != length(afbatch))
+		stop("Number of filenames does not match number of samples")
+		
+	outlier <- matrix(data=FALSE,nrow=nrow(intensity(afbatch)),ncol=ncol(intensity(afbatch)))
+	if (is.null(SF) | is.null(SDT) | rm.outliers | rm.mask | rm.extra) {
+		stdvs <- pixels <- NULL
+		for (i in 1:length(fname)) {
+			celdata <- readCel(fname[i],readHeader=FALSE,readIntensities=FALSE,readStdvs=TRUE,readPixels=TRUE)
+			if (is.null(SF) | is.null(SDT)) 
+				stdvs <- cbind(stdvs,celdata$stdvs)
+				pixels <- cbind(pixels,celdata$pixels)
+			if (rm.outliers | rm.extra) {
+				writeLines("Computing outliers")
+				outlier[celdata$outliers,i] <- TRUE
+			}
+			if (rm.mask | rm.extra) 
+				outlier[celdata$masked,i] <- TRUE
+		}
+		if (is.null(SF) | is.null(SDT)) {
+			writeLines("Computing SF and SDT")
+			sfsdtlist <- computeAffxSFandSDT(afbatch,stdvs,pixels,digits=3)
+		}
+		if (is.null(SF))
+			SF <- sfsdtlist$SF[1:2]
+		if (is.null(SDT))
+			SDT <- sfsdtlist$SDT[1:2]
+	}
+
 # calculate SF and SDT, if not specified by the user, as these must
 # always be available
-	if (is.null(SF) | is.null(SDT))
-		sfsdtlist <- computeSFandSDT(afbatch,digits=3,celfile.path=celfile.path)
-	if (is.null(SF))
-		SF <- sfsdtlist$SF[1:2]
 	if (any(SF <= 0)) 
 		stop("SF values must be positive")
 	if (length(SF) != 2)
 		stop("Must be two SF values, one for each CEL file")
 
-	if (is.null(SDT))
-		SDT <- sfsdtlist$SDT[1:2]
 	if (any(SDT <= 0)) 
 		stop("SDT values must be positive")
 	if (length(SDT) != 2)
 		stop("Must be two SDT values, one for each CEL file")
 
 # calculate the outlier matrix, if excluding outliers / masked values
-	if (any(rm.outliers,rm.mask,rm.extra))
-		outlier <- computeOutlier(afbatch,rm.outliers=rm.outliers,rm.mask=rm.mask,rm.extra=rm.extra,celfile.path=celfile.path)
+#	if (any(rm.outliers,rm.mask,rm.extra))
+#		outlier <- computeOutlier(afbatch,rm.outliers=rm.outliers,rm.mask=rm.mask,rm.extra=rm.extra,celfile.path=celfile.path)
 
 # initialize variables needed in later calculations.  For the PM/MM
 # index, intens1/intens2, and max1/max2 values, these are calculated
@@ -245,8 +270,8 @@ SScore <- function(afbatch = stop("No CEL files specified"),SF = NULL,
 # deviation values
 	Score <- (Score-meanSx)/Sstdev
 
-	fn1 <- sampleNames(afbatch)[1]
-	fn2 <- sampleNames(afbatch)[2]
+	fn1 <- fname[1]
+	fn2 <- fname[2]
 
 # output information on these parameters if desired by the user
 	if (verbose) {
