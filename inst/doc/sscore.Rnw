@@ -59,7 +59,7 @@ binary *.CEL files.  Also added option to specify *.CEL file names in the \Rfunc
 \item[1.4.2] corrected a bug resulting in too many open file handles for large \Robject{AffyBatch}
 objects.
 
-\item[1.4.1] 
+\item[1.4.1] corrected a bug in assigning column names to \Robject{exprSet} object
 
 \item[1.4.0] first public release
 
