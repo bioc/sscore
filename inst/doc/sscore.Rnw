@@ -1,7 +1,7 @@
 % -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
 %\VignetteIndexEntry{SScore primer}
 %\VignetteKeywords{Analysis, Affymetrix}
-%\VignetteDepends{sscore, affy}
+%\VignetteDepends{sscore, affy, affxparser}
 %\VignettePackage{sscore}
 %documentclass[12pt, a4paper]{article}
 \documentclass[12pt]{article}
@@ -48,6 +48,23 @@ microarray datasets, the S-Score demonstrated greater sensitivity than many
 existing methods, without sacrificing specificity. The \Rpackage{sscore} package implements 
 the S-Score algorithm in the R programming environment, making it available 
 to users of the Bioconductor\footnote{\url{http://www.bioconductor.org/}} project.
+
+\section{Version history}
+
+\begin{description}
+\item[1.5.4] incorporated routines from the \Rpackage{affxparser} package for reading of 
+binary *.CEL files.  Also added option to specify *.CEL file names in the \Rfunction{SScore} and
+\Rfunction{SScoreBatch} functions.
+
+\item[1.4.2] corrected a bug resulting in too many open file handles for large \Robject{AffyBatch}
+objects.
+
+\item[1.4.1] 
+
+\item[1.4.0] first public release
+
+\item[1.0.0] initial development version
+\end{description}
 
 \section{Reading in data and generating S-Scores}
 Affymetrix data are generated from GeneChips$^{TM}$ by analyzing the scanned 
@@ -113,6 +130,10 @@ Optional parameters for \Rfunction{SScore} include:
 \begin{description}
 \item[celfile.path] -- character string giving the directory in which the *.CEL files are stored.  If 
 a directory is not specified, the current working directory is used.
+
+\item[celfile.names] -- character vector giving the filenames of the *.CEL files corresponding to
+the columns of the \Robject{AffyBatch} object.  If filenames are not specified, the sample names of
+the \Robject{AffyBatch} object are used.
 
 \item[SF, SDT] -- the Scale Factor and Standard Difference Threshold. Each is a 
 vector with length equal to the number of columns in the AffyBatch object, 
@@ -341,19 +362,32 @@ stand-alone version of the S-Score.
 \item[celfile.path] -- character string specifying the directory for *.CEL files
 \end{description}
 
+\Rfunction{computeSFandSDT} requires that the *.CEL files be in text format.  The alternate function
+\Rfunction{computeAffxSFandSDT} expects information obtained from the \Rpackage{affxparser} routines, so that 
+either text or binary files may be used.  In addition to the options for \Rfunction{computeSFandSDT}, \Rfunction{computeAffxSFandSDT}
+has the following required parameters:
+
+\begin{description}
+\item[stdvs] -- a vector of standard deviations of the probe intensities (which can be read using
+the \verb+readStdvs=TRUE+ option in the \Rpackage{affxparser} function \Rfunction{readCel}).
+
+\item[pixels] -- a vector of the number of pixels used in calculating the probe intensity (which 
+can be read using the \verb+readStdvs=TRUE+ option in the \Rpackage{affxparser} function \Rfunction{readCel}).
+\end{description}
+
 \section{Identifying outliers}
-The \Rfunction{SScore} and \Rfunction{SScoreBatch} functions call the function \Rfunction{computeOutlier} 
-to flag probes as outliers that should be excluded from the S-Score calculation. This is an internal 
-function that generally will not be called or modified, but may be altered if necessary to meet specific 
-needs. The \Rfunction{computeOutlier} function is called if the \verb+rm.outliers+, \verb+rm.mask+, 
-or \verb+rm.extra+ parameters of \Rfunction{SScore} or \Rfunction{SScoreBatch} are set to \verb+TRUE+. As 
-currently implemented, these parameters work as described in the \Rpackage{affy} documentation since they 
+The current version of the \Rfunction{SScore} and \Rfunction{SScoreBatch} functions use the
+information contained in the *.CEL files to flag probes as outliers that should be excluded from
+the S-Score calculation.  In previous versions, this was accomplished using the \Rfunction{computeOutlier}
+function, which is retained for compatibility.  This is an internal 
+function that generally will not be called or modified. The \Rfunction{computeOutlier} function was called if the \verb+rm.outliers+, \verb+rm.mask+, 
+or \verb+rm.extra+ parameters of \Rfunction{SScore} or \Rfunction{SScoreBatch} are set to \verb+TRUE+. 
+These parameters work as described in the \Rpackage{affy} documentation since they 
 are passed to the \Rfunction{ReadAffy} function to identify outlier and mask probes. The return value from 
 \Rfunction{computeOutlier} is a logical matrix the same size and order as the intensity matrix for the 
 \Robject{AffyBatch} object. Each cell of the logical matrix contains a \verb+TRUE+ value if the 
 corresponding intensity is identified as an outlier and excluded from the S-Score calculation; otherwise it 
-contains \verb+FALSE+. By changing the \Rfunction{computeOutlier }function, you may create additional features
-not currently available, such as removing modified probes.
+contains \verb+FALSE+. 
 
 \section{Changes from the stand-alone version}
 The S-Score algorithm has been previously implemented as a stand-alone 
