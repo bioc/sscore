@@ -2,6 +2,19 @@ SScoreBatch <- function(afbatch = stop("No CEL files specified"),
  compare =  stop("No list of comparisons given"), SF = NULL,SDT =
  NULL, rm.outliers = TRUE,rm.mask = TRUE, rm.extra = TRUE, digits = 
  NULL,verbose = FALSE,celfile.path = NULL, celfile.names = NULL) {
+#afbatch <- cel
+#classlabel <- c(0,0,1)
+#SF <- c(1.2,1.4,1.3)
+#SDT <- c(16,14,15)
+#rm.outliers <- TRUE
+#rm.mask <- TRUE
+#rm.extra <- TRUE
+#digits <- NULL
+#verbose <- FALSE
+#celfile.path <- NULL
+#celfile.names <- NULL
+
+
 #######################################################################
 #
 # This function computes the S-Score values for multiple probe sets in
@@ -12,27 +25,27 @@ SScoreBatch <- function(afbatch = stop("No CEL files specified"),
 #	afbatch - an AffyBatch object containing the data on the chips
 #                 to be compared
 #	compare - an N x 2 matrix, where N is the number of pairwise 
-#                 comparisons; each row of the matrix contains the
-#                 afbatch indices of the chips to be compared.  For
-#                 example,
+#             comparisons; each row of the matrix contains the
+#             afbatch indices of the chips to be compared.  For
+#             example,
 #				1	3
 #				4	2
 #				5	9
 #				...
 #
-#		  would do a comparison of chip 1 to chip 3, a compar-
-#                 ison of chip 4 to chip 2, a comparison of chip 5 to
-#                 chip 9, etc.
-#	SF     -  a vector of SF values (the Scale Factor, which is
-#                 part of the general output from the Affymetrix GCOS
-#                 software), one for each chip.  If SF = NULL, these
-#                 will be calculated internally
-#       SDT    -  a vector of SDT values (the Standard Difference
-#                 Threshold, which can be derived from the general 
-#                 output from the Affymetrix GCOS software using the
-#                 formula SDT = 4 * RawQ * Scale Factor), one for each
-#                 chip.  If SDT = NULL, these will be calculated
-#                 internally
+#		      would do a comparison of chip 1 to chip 3, a compar-
+#             ison of chip 4 to chip 2, a comparison of chip 5 to
+#             chip 9, etc.
+#	SF -  a vector of SF values (the Scale Factor, which is
+#         part of the general output from the Affymetrix GCOS
+#         software), one for each chip.  If SF = NULL, these
+#         will be calculated internally
+#   SDT -  a vector of SDT values (the Standard Difference
+#          Threshold, which can be derived from the general 
+#          output from the Affymetrix GCOS software using the
+#          formula SDT = 4 * RawQ * Scale Factor), one for each
+#          chip.  If SDT = NULL, these will be calculated
+#          internally
 #	rm.outliers,
 #       rm.mask,
 #       rm.extra - logical value to remove outliers and/or masked 
@@ -40,17 +53,17 @@ SScoreBatch <- function(afbatch = stop("No CEL files specified"),
 #                  of rm.outliers and rm.mask.  Works identically to
 #                  these parameters in ReadAffy(), which it calls
 #	digits - the number of significant digits to retain when
-#                returning S-Score values
+#            returning S-Score values
 #	verbose  - logical value indicating whether additional informa-
-#                  tion on the calculations should be displayed
-#       celfile.path - character string giving the directory path to
-#                      the *.CEL files being read, or NULL if the *.CEL
-#                      files are in the current directory
+#              tion on the calculations should be displayed
+#   celfile.path - character string giving the directory path to
+#                  the *.CEL files being read, or NULL if the *.CEL
+#                  files are in the current directory
 #
 # Value:
-#	an object of class ExprSet, with the exprs slot containing the
-#       S-score values and the se.exprs slot containing the CorrDiff
-#       values
+#	an object of class ExpressionSet, with the exprs slot containing the
+#   S-score values and the se.exprs slot containing the CorrDiff
+#   values
 #
 #######################################################################
 
@@ -70,16 +83,27 @@ SScoreBatch <- function(afbatch = stop("No CEL files specified"),
 	if (is.null(SF) | is.null(SDT) | rm.outliers | rm.mask | rm.extra) {
 		stdvs <- pixels <- NULL
 		for (i in 1:length(fname)) {
-			celdata <- readCel(fname[i],readHeader=FALSE,readIntensities=FALSE,readStdvs=TRUE,readPixels=TRUE)
+###			celdata <- readCel(fname[i],readHeader=FALSE,readIntensities=FALSE,readStdvs=TRUE,readPixels=TRUE)
+			if (is.null(celfile.path))
+				filename <- fname[i] else
+				filename <- file.path(celfile.path,fname[i])
+			celdata <- read.celfile(filename)
 			if (is.null(SF) | is.null(SDT)) 
-				stdvs <- cbind(stdvs,celdata$stdvs)
-				pixels <- cbind(pixels,celdata$pixels)
+###				stdvs <- cbind(stdvs,celdata$stdvs)
+				stdvs <- cbind(stdvs,celdata$INTENSITY$STDEV)
+###				pixels <- cbind(pixels,celdata$pixels)
+				pixels <- cbind(pixels,celdata$INTENSITY$NPIXELS)
 			if (rm.outliers | rm.extra) {
 				writeLines("Computing outliers")
-				outlier[celdata$outliers,i] <- TRUE
+###				outlier[celdata$outliers,i] <- TRUE
+				outlier.xy <- celdata$OUTLIERS
+				outlier[xy2indices(outlier.xy[,1],outlier.xy[,2],abatch=afbatch),i] <- TRUE
 			}
-			if (rm.mask | rm.extra) 
-				outlier[celdata$masked,i] <- TRUE
+			if (rm.mask | rm.extra) {
+###				outlier[celdata$masked,i] <- TRUE
+				outlier.xy <- celdata$OUTLIERS
+				outlier[xy2indices(outlier.xy[,1],outlier.xy[,2],abatch=afbatch),i] <- TRUE
+			}
 		}
 		if (is.null(SF) | is.null(SDT)) {
 			writeLines("Computing SF and SDT")
@@ -267,23 +291,29 @@ SScoreBatch <- function(afbatch = stop("No CEL files specified"),
 		CorrDiff <- round(CorrDiff,digits)
 	}
 
-	fnames <- sampleNames(afbatch)
-	dimnames(Score) <- list(geneNames(afbatch),paste(fnames[compare[,1]],"vs",fnames[compare[,2]]))
-	dimnames(CorrDiff) <- list(geneNames(afbatch),paste(fnames[compare[,1]],"vs",fnames[compare[,2]]))
+###	fnames <- sampleNames(afbatch)
+###	dimnames(Score) <- list(geneNames(afbatch),paste(fnames[compare[,1]],"vs",fnames[compare[,2]]))
+###	dimnames(CorrDiff) <- list(geneNames(afbatch),paste(fnames[compare[,1]],"vs",fnames[compare[,2]]))
+	rownames(Score) <- rownames(CorrDiff) <- geneNames(afbatch)
+	colnames(Score) <- colnames(CorrDiff) <- paste("Chip",compare[,1],"vs",compare[,2])
 	comparison <- 1:length(colnames(Score))
 	Score.pData <- data.frame(comparison,row.names=colnames(Score))
-	ScorePheno <- new('phenoData', pData=Score.pData,
-	  varLabels=list(sample = "arbitrary numbering"))
+###	ScorePheno <- new('phenoData', pData=Score.pData,
+###	  varLabels=list(sample = "arbitrary numbering"))
+	Score.Metadata <- data.frame(labelDescription = "arbitrary numbering", 
+	  row.names = "comparison")
+	ScorePheno <- new("AnnotatedDataFrame", data=Score.pData, varMetadata =
+	  Score.Metadata)
 
 # put the values into an ExprSet to return.  The phenoData, annotation,
 # and description are the same as the AffyBatch object
-	eset <- new("exprSet",
+	eset <- new("ExpressionSet",
 		exprs=Score,
-		se.exprs=CorrDiff,
+#		se.exprs=CorrDiff,
 		phenoData=ScorePheno,
-		annotation=annotation(afbatch),
-		description=description(afbatch),
-		notes=notes(afbatch))
+		annotation=annotation(afbatch))
+#		description=description(afbatch),
+#		notes=notes(afbatch))
 	return(eset)
 }
 

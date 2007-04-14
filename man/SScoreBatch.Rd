@@ -50,8 +50,7 @@ SScoreBatch(afbatch = stop("No CEL files specified"), compare = stop("No list of
   values; if \code{NULL}, the maximum number of significant digits are retained.
 }
 \value{
-  An \code{exprSet} with S-Score values in the \code{exprs} slot and
-  CorrDiff values in the \code{se.exprs}.
+  An \code{ExpressionSet} with S-Score values in the \code{exprs} slot.
 }
 \references{ 
 

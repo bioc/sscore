@@ -1,7 +1,7 @@
 % -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
 %\VignetteIndexEntry{SScore primer}
 %\VignetteKeywords{Analysis, Affymetrix}
-%\VignetteDepends{sscore, affy, affxparser}
+%\VignetteDepends{sscore, affy}
 %\VignettePackage{sscore}
 %documentclass[12pt, a4paper]{article}
 \documentclass[12pt]{article}
@@ -45,26 +45,16 @@ normal distribution. Thus, p-values can be easily calculated from the
 S-Score, and a separate step estimating the probe set expression summary 
 values is not needed. Furthermore, in comparisons of dilution and spike-in 
 microarray datasets, the S-Score demonstrated greater sensitivity than many 
-existing methods, without sacrificing specificity. The \Rpackage{sscore} package implements 
+existing methods, without sacrificing specificity \citep{kennedy2006}. The \Rpackage{sscore} package \citep{kennedy2006b} implements 
 the S-Score algorithm in the R programming environment, making it available 
 to users of the Bioconductor\footnote{\url{http://www.bioconductor.org/}} project.
 
-\section{Version history}
-
-\begin{description}
-\item[1.5.4] incorporated routines from the \Rpackage{affxparser} package for reading of 
-binary *.CEL files.  Also added option to specify *.CEL file names in the \Rfunction{SScore} and
-\Rfunction{SScoreBatch} functions.
-
-\item[1.4.2] corrected a bug resulting in too many open file handles for large \Robject{AffyBatch}
-objects.
-
-\item[1.4.1] corrected a bug in assigning column names to \Robject{exprSet} object
-
-\item[1.4.0] first public release
-
-\item[1.0.0] initial development version
-\end{description}
+\section{What's new in this version}
+This release adds significant improvements to the implementation of the S-Score algorithm.
+With the \Rfunction{SScore} function, it is now possible to perform class comparisons including
+multiple (replicate) chips per class, though the method is currently restricted to performing two class comparisons.
+(The \Rfunction{SScoreBatch} function remains unchanged, performing multiple two-chip (paired)
+comparisons.  It is retained largely for backwards compatibility with previous releases.)
 
 \section{Reading in data and generating S-Scores}
 Affymetrix data are generated from GeneChips$^{TM}$ by analyzing the scanned 
@@ -99,10 +89,9 @@ Note that, even though the intensities have been loaded into R, \Rfunction{SScor
 the *.CEL files later to obtain the information about outliers. {\bf If a copy of the *.CEL files is not available when }
 \Rfunction{SScore} {\bf is called, an error may result.}
 
-The \Rfunction{SScore} and \Rfunction{SScoreBatch} functions return an object of class \Robject{exprSet}. (The class \Robject{exprSet} is described in the \Rpackage{Biobase} vignette.) The S-Score 
-values are returned in the \Robject{exprs} slot.  The \Robject{se.exprs} slot contains the CorrDiff
-values, which represent the correlation of each probe on the first chip with the corresponding
-probe on the second chip.
+The \Rfunction{SScore} and \Rfunction{SScoreBatch} functions return an object of class \Robject{ExpressionSet}. (The class \Robject{ExpressionSet} is described in the \Rpackage{Biobase} vignette.) The S-Score 
+values are returned in the \Robject{exprs} slot.
+
 
 The following examples illustrate the \Rpackage{sscore} package with the results of the S-Score 
 analysis for the \Robject{affybatch.example} data set included with the \Rpackage{affy} package.  
@@ -218,9 +207,46 @@ SScore.sfsdt <- SScore(cel,SF=c(22.24,25.49),SDT=c(2526.300,2751.634),
 @
 
 \end{description}
+\section{Multichip comparisons}
+Beginning with release 1.7.0, the \Rfunction{SScore} function is capable of comparing
+two classes where each class includes replicates.  As with previous releases, only two class comparisons are available.  The multichip comparisons are performed by adding a \verb+classlabel+ vector which distinguishes classes, similar to that of the
+\Rpackage{multtest} package.  The \verb+classlabel+ vector describes to which
+class each GeneChip belongs.  Its length is equal to the number of chips being compared, with
+each element containing either a 0 or a 1, indicating class assignment.  Thus, the assignment
+
+<<results=hide>>= 
+labels <- c(0,0,0,1,1,1)
+@ 
+
+would compare the first three chips to the last three chips.  (Note that the number of chips
+in the two classes being compared do not have to be equal.)  If the \verb+classlabel+ parameter
+is not specified, it defaults to a two-chip comparison for compatibility with previous versions
+of \Rfunction{SScore}.
+
+An example of a multichip S-Score comparison would be
+
+<<results=hide>>= 
+data(affybatch.example)
+pathname <- system.file("doc",package="sscore")
+cel <- affybatch.example
+SScore.multi <- SScore(cel,classlabel=c(0,0,1),
+  SF=c(22.24,25.49,25.56),SDT=c(2526.300,2590.297,
+  2751.634),celfile.path=pathname)
+@ 
+
+and the first few S-Score values are
+
+<<>>= 
+exprs(SScore.multi)[1:20]
+@
+
+The other parameters of \Rfunction{SScore} remain unchanged.  The output data from the multichip 
+comparison are still standard S-Scores, i.e., they still follow a Normal(0,1) distribution and
+may be converted to p-values as described below.
+
 \section{Multiple pairwise comparisons}
 
-The \Rfunction{SScore} function calculates the S-Score values for one pair of chips (i.e. a 
+Previous versions of the \Rfunction{SScore} function calculated the S-Score values for one pair of chips (i.e. a 
 single two-chip comparison). However, for many experiments, several chips 
 need to be compared. This can be done using the \Rfunction{SScoreBatch} function, which automates 
 the process of making several two-chip comparisons. The setup and options 
@@ -415,6 +441,29 @@ Support -> Developer's Network -> Open Source -> MAS5 Stat SDK.  Base 2 logarith
 
 A Java version of the S-Score algorithm is also under development.  Differences between the Java version
 and the \Rpackage{sscore} package will be included after the Java version is released.
+
+\section{Version history}
+
+\begin{description}
+\item[1.7.0] added routines to compute S-Scores for replicate chips within a
+2-class comparison.  Also updated functions to operate on the new \Rfunction{ExpressionSet}
+class, and changed routines for reading of binary *.CEL files
+from \Rpackage{affxparser} to \Rpackage{affyio} due to stability problems with
+the former on the Macintosh PowerPC platform.
+
+\item[1.5.4] incorporated routines from the \Rpackage{affxparser} package for reading of 
+binary *.CEL files.  Also added option to specify *.CEL file names in the \Rfunction{SScore} and
+\Rfunction{SScoreBatch} functions.
+
+\item[1.4.2] corrected a bug resulting in too many open file handles for large \Robject{AffyBatch}
+objects.
+
+\item[1.4.1] corrected a bug in assigning column names to \Robject{exprSet} object
+
+\item[1.4.0] first public release
+
+\item[1.0.0] initial development version
+\end{description}
 
 \section{Acknowledgements}
 The development of the S-Score algorithm and its original implementation in 

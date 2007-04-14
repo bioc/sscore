@@ -5,12 +5,13 @@
   Computes the S-Score values for a pair of Affymetrix GeneChips
 }
 \usage{
-SScore(afbatch = stop("No CEL files specified"), SF = NULL, SDT = NULL, 
-       rm.outliers = TRUE, rm.mask = TRUE, rm.extra = TRUE, 
+SScore(afbatch = stop("No CEL files specified"), classlabel = c(0,1), SF = NULL, 
+       SDT = NULL, rm.outliers = TRUE, rm.mask = TRUE, rm.extra = TRUE, 
        digits = NULL, verbose = FALSE, celfile.path = NULL, celfile.names = NULL)
 }
 \arguments{
   \item{afbatch}{ An \code{AffyBatch} object }
+  \item{classlabel}{ A vector identifying the class for each column of the \code{AffyBatch} object }
   \item{SF}{ a list of Scale Factor (SF) values for each GeneChip }
   \item{SDT}{ a list of Standard Difference Threshold (SDT) values for each GeneChip }
   \item{rm.outliers}{ should the spots marked as 'OUTLIERS' be excluded from S-Score calculation? }
@@ -23,8 +24,14 @@ SScore(afbatch = stop("No CEL files specified"), SF = NULL, SDT = NULL,
 }
 \details{
   Computes S-Score values as described by Zhang et al. (2002).  \code{SScore} provides a simpler
-  interface when comparing only two GeneChips, while \code{SScoreBatch} allows comparison
-  of multiple pairs of chips.
+  interface for comparing only two classes of GeneChips, while \code{SScoreBatch} compares 
+  multiple pairs of chips.
+
+  The classlabel consists of a vector with one entry for each column of the \code{AffyBatch} object.
+  Each entry consists of a 0 or a 1 to identify the class to which the chip for the corresponding column
+  belongs.  \code{SScore} will conduct a two-class test comparing all chips labeled 0 to all chips
+  labeled 1.  If classlabel is not specified, it defaults to a two-chip comparison, compatible with
+  previous versions of \code{SScore}.
 
   The SF and SDT factors are required for all calculations.  If \code{NULL}, these values will be
   calculated according to the Affymetrix Statistical Algorithms Description Document.  \code{digits}
@@ -32,8 +39,7 @@ SScore(afbatch = stop("No CEL files specified"), SF = NULL, SDT = NULL,
   the maximum number of significant digits are retained.
 }
 \value{
-  An \code{exprSet} with S-Score values in the \code{exprs} slot and
-  CorrDiff values in the \code{se.exprs}.
+  An \code{ExpressionSet} with S-Score values in the \code{exprs} slot.
 }
 \references{ 
 
