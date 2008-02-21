@@ -40,7 +40,7 @@ SScoreBatch(afbatch = stop("No CEL files specified"), compare = stop("No list of
   }
 
   would do a comparison of chip 1 to chip 3, a comparison of chip 4 to chip 2, a comparison of chip 5
-  to chip 9, and so on.  The columns in \code{exprSet} correspond to the rows of \code{compare}, so
+  to chip 9, and so on.  The columns in \code{ExpressionSet} correspond to the rows of \code{compare}, so
   that the results of the first comparison are in column 1, the results of the second comparison are
   in column 2, and so on.
 
