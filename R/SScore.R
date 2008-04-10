@@ -2,17 +2,6 @@ SScore <- function(afbatch = stop("No CEL files specified"), classlabel =
  c(0,1), SF = NULL, SDT = NULL, rm.outliers = TRUE, rm.mask = TRUE,
  rm.extra = TRUE, digits = NULL, verbose = FALSE,celfile.path = NULL, 
  celfile.names=NULL) {
-#afbatch <- cel
-#classlabel <- c(0,0,1)
-#SF <- c(1.2,1.4,1.3)
-#SDT <- c(16,14,15)
-#rm.outliers <- TRUE
-#rm.mask <- TRUE
-#rm.extra <- TRUE
-#digits <- NULL
-#verbose <- FALSE
-#celfile.path <- NULL
-#celfile.names <- NULL
 
 
 #######################################################################
@@ -203,7 +192,7 @@ SScore <- function(afbatch = stop("No CEL files specified"), classlabel =
 # index, intens1/intens2, and max1/max2 values, these are calculated
 # outside of the loop, since they are constant for a given CDF or chip.
 	m.gamma <- 0.1
-	probenames <- geneNames(afbatch)
+	probenames <- featureNames(afbatch)
 	pmidx <- pmindex(afbatch)
 	mmidx <- mmindex(afbatch)
 ###	intens1 <- intensity(afbatch[,1])*SF[1]
@@ -273,7 +262,7 @@ SScore <- function(afbatch = stop("No CEL files specified"), classlabel =
 		N2 <- sum(classlabel==1)
 		f.err <- (apply(diff1,1,sum)/N1-apply(diff2,1,sum)/N2)/
 		  sqrt(m.gamma*m.gamma*(apply(diff1*diff1,1,sum)/(N1*N1)+apply(diff2*diff2,1,sum)/(N2*N2))+
-		  sum(SDT[classlabel==0]*SDT[classlabel==0])/(N1*N1)+sum(SDT[classlabel==1]*SDT[classlabel==1])/(N1*N1)) 
+		  sum(SDT[classlabel==0]*SDT[classlabel==0])/(N1*N1)+sum(SDT[classlabel==1]*SDT[classlabel==1])/(N2*N2)) 
 
 # threshold or impute outlying f.err values.  The cutoff of 15 was
 # arbitrarily decided in the original version; how it was determined
@@ -381,7 +370,7 @@ SScore <- function(afbatch = stop("No CEL files specified"), classlabel =
 
 	Score <- as.matrix(Score)
 	CorrDiff <- as.matrix(CorrDiff)
-	rownames(Score) <- rownames(CorrDiff) <- geneNames(afbatch)
+	rownames(Score) <- rownames(CorrDiff) <- featureNames(afbatch)
 #	colnames(Score) <- colnames(CorrDiff) <- paste(fn1,"vs",fn2)
 	colnames(Score) <- colnames(CorrDiff) <- "Class 0 vs 1"
 	comparison <- 1

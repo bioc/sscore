@@ -3,12 +3,11 @@
 %\VignetteKeywords{Analysis, Affymetrix}
 %\VignetteDepends{sscore, affy}
 %\VignettePackage{sscore}
-%documentclass[12pt, a4paper]{article}
 \documentclass[12pt]{article}
 
-\usepackage{amsmath,pstricks}
-\usepackage{hyperref}
 \usepackage[authoryear,round]{natbib}
+\usepackage{hyperref}
+\usepackage{hypernat}
 
 \textwidth=6.2in
 \textheight=8.5in
@@ -17,8 +16,8 @@
 \evensidemargin=.1in
 \headheight=-.3in
 
-\newcommand{\scscst}{\scriptscriptstyle}
-\newcommand{\scst}{\scriptstyle}
+%\newcommand{\scscst}{\scriptscriptstyle}
+%\newcommand{\scst}{\scriptstyle}
 \newcommand{\Rfunction}[1]{{\texttt{#1}}}
 \newcommand{\Robject}[1]{{\texttt{#1}}}
 \newcommand{\Rpackage}[1]{{\textit{#1}}}
@@ -50,14 +49,10 @@ the S-Score algorithm in the R programming environment, making it available
 to users of the Bioconductor\footnote{\url{http://www.bioconductor.org/}} project.
 
 \section{What's new in this version}
-This release adds significant improvements to the implementation of the S-Score algorithm.
-With the \Rfunction{SScore} function, it is now possible to perform class comparisons including
-multiple (replicate) chips per class, though the method is currently restricted to performing two class comparisons.
-(The \Rfunction{SScoreBatch} function remains unchanged, performing multiple two-chip (paired)
-comparisons.  It is retained largely for backwards compatibility with previous releases.)
+This release has minor changes for compatibility with the \Robject{ExpressionSet} data class, as well as minor bug fixes.
 
 \section{Reading in data and generating S-Scores}
-Affymetrix data are generated from GeneChips$^{TM}$ by analyzing the scanned 
+Affymetrix data are generated from GeneChips\textregistered\ by analyzing the scanned 
 image of the chip (stored in a *.DAT file) to produce a *.CEL file. The 
 *.CEL file contains, among other information, a decimal number for each 
 probe on the chip that corresponds to its intensity. The S-Score algorithm 

@@ -193,13 +193,13 @@ computeAffxSFandSDT <- function(afbatch,stdvs,pixels,TGT=500, digits=NULL,
 		if (any(rawMM < 0))
 			stop("Raw MM intensity is out of range.  Please check CEL file")
 		logMM <- as.matrix(round(BINw * logb(rawMM,2)))
-		numMM <- apply(logI,2,table) 
+		numMM <- apply(logMM,2,table) 
 
 		rawPM <- intens[unlist(pm.index),]
 		if (any(rawPM < 0))
 			stop("Raw PM intensity is out of range.  Please check CEL file")
 		logPM <- as.matrix(round(BINw * logb(rawPM,2))) 
-		numPM <- apply(logI,2,table) 
+		numPM <- apply(logPM,2,table) 
 
 		for (i in 1:ncol(logPM)) {
 			x11()
