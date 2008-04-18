@@ -2,18 +2,6 @@ SScoreBatch <- function(afbatch = stop("No CEL files specified"),
  compare =  stop("No list of comparisons given"), SF = NULL,SDT =
  NULL, rm.outliers = TRUE,rm.mask = TRUE, rm.extra = TRUE, digits = 
  NULL,verbose = FALSE,celfile.path = NULL, celfile.names = NULL) {
-#afbatch <- cel
-#classlabel <- c(0,0,1)
-#SF <- c(1.2,1.4,1.3)
-#SDT <- c(16,14,15)
-#rm.outliers <- TRUE
-#rm.mask <- TRUE
-#rm.extra <- TRUE
-#digits <- NULL
-#verbose <- FALSE
-#celfile.path <- NULL
-#celfile.names <- NULL
-
 
 #######################################################################
 #
