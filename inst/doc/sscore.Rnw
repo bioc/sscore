@@ -89,17 +89,17 @@ values are returned in the \Robject{exprs} slot.
 
 
 The following examples illustrate the \Rpackage{sscore} package with the results of the S-Score 
-analysis for the \Robject{affybatch.example} data set included with the \Rpackage{affy} package.  
+analysis for the \Robject{Dilution} data set included with the \Rpackage{affy} package.  
 These examples utilize the data files 20A, 20B, and 10A supplied with the \Rpackage{sscore} package,
-which are *.CEL files corresponding to the data in the \Robject{affybatch.example} data set.
+which are *.CEL files corresponding to the data in the \Robject{Dilution} data set.
 
 A basic S-Score analysis without any optional parameters is generated using the commands:
 
 <<results=hide>>= 
-data(affybatch.example)  ## get the example data
+data(Dilution)  ## get the example data
 ## get the path to the directory with the files 20A, 20B, and 10A
 pathname <- system.file("doc",package="sscore")
-cel <- affybatch.example[,c(1,2)] ## only need the first 2 columns
+cel <- Dilution[,c(1,2)] ## only need the first 2 columns
 SScore.basic <- SScore(cel,celfile.path=pathname)
 @ 
 
@@ -132,9 +132,9 @@ by the \Rfunction{SScore} function.
 An example of an S-Score analysis in which SF and SDT were specified is
 
 <<results=hide>>= 
-data(affybatch.example)
+data(Dilution)
 pathname <- system.file("doc",package="sscore")
-cel <- affybatch.example[,c(1,2)]
+cel <- Dilution[,c(1,2)]
 SScore.sfsdt <- SScore(cel,SF=c(22.24,25.49),
 SDT=c(2526.300,2590.297),celfile.path=pathname)
 @ 
@@ -156,9 +156,9 @@ excludes all probes designated as outliers in the *.CEL file.
 An example of an S-Score analysis in which outliers were included is
 
 <<results=hide>>= 
-data(affybatch.example)
+data(Dilution)
 pathname <- system.file("doc",package="sscore")
-cel <- affybatch.example[,c(1,2)]
+cel <- Dilution[,c(1,2)]
 SScore.outliers <- SScore(cel,rm.outliers=FALSE,
 rm.mask=FALSE,celfile.path=pathname)
 @ 
@@ -178,9 +178,9 @@ The example \Robject{SScore.digits} contains the results of a S-Score analysis i
 significant digits were retained:
 
 <<results=hide>>= 
-data(affybatch.example)
+data(Dilution)
 pathname <- system.file("doc",package="sscore")
-cel <- affybatch.example[,c(1,2)]
+cel <- Dilution[,c(1,2)]
 SScore.digits <- SScore(cel,digits=3,celfile.path=pathname)
 @ 
 
@@ -195,9 +195,9 @@ information on the analyses is printed. This includes the chip type, sample
 names, values of alpha and gamma, and the SF and SDT values:
 
 <<>>= 
-data(affybatch.example)
+data(Dilution)
 pathname <- system.file("doc",package="sscore")
-cel <- affybatch.example[,c(1,2)]
+cel <- Dilution[,c(1,2)]
 SScore.sfsdt <- SScore(cel,SF=c(22.24,25.49),SDT=c(2526.300,2751.634),
 verbose=TRUE,celfile.path=pathname)
 @
@@ -222,9 +222,9 @@ of \Rfunction{SScore}.
 An example of a multichip S-Score comparison would be
 
 <<results=hide>>= 
-data(affybatch.example)
+data(Dilution)
 pathname <- system.file("doc",package="sscore")
-cel <- affybatch.example
+cel <- Dilution
 SScore.multi <- SScore(cel,classlabel=c(0,0,1),
 SF=c(22.24,25.49,25.56),SDT=c(2526.300,2590.297,
 2751.634),celfile.path=pathname)
@@ -280,10 +280,10 @@ corresponding to the second row of the \Robject{compare} matrix, and so forth.
 A basic S-Score analysis using \Rfunction{SScoreBatch} is generated using the commands:
 
 <<results=hide>>= 
-data(affybatch.example)
+data(Dilution)
 pathname <- system.file("doc",package="sscore")
 compare <- matrix(c(1,2,1,3,2,3),ncol=2,byrow=TRUE)
-SScoreBatch.basic <- SScoreBatch(affybatch.example,compare=compare,
+SScoreBatch.basic <- SScoreBatch(Dilution,compare=compare,
 celfile.path=pathname)
 @ 
 
@@ -297,10 +297,10 @@ The example \Robject{SScoreBatch.sfsdt} contains the results of an analysis in w
 values were specified
 
 <<results=hide>>= 
-data(affybatch.example)
+data(Dilution)
 pathname <- system.file("doc",package="sscore")
 compare <- matrix(c(1,2,1,3,2,3),ncol=2,byrow=TRUE)
-SScoreBatch.sfsdt <- SScoreBatch(affybatch.example,compare=compare,
+SScoreBatch.sfsdt <- SScoreBatch(Dilution,compare=compare,
 SF=c(22.24,25.49,25.56),SDT=c(2526.300,
 2590.297,2751.634),celfile.path=pathname)
 @ 
@@ -326,7 +326,7 @@ from the mean, a typical cutoff value) would correspond to a p-value of
 
 <<>>= 
 sscores <- exprs(SScore.basic) ## extract the S-Score values
-signif <- geneNames(affybatch.example)[abs(sscores) >= 3]
+signif <- geneNames(Dilution)[abs(sscores) >= 3]
                         ## find those greater than 3 SD
 @ 
 
