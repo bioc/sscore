@@ -6,7 +6,7 @@ Author: Richard Kennedy <rkennedy@vcu.edu>, based on C++
   code from Li Zhang <zhangli@odin.mdacc.tmc.edu> and
   Borland Delphi code from Robnet Kerns <rtkerns@vcu.edu>.
 Maintainer: Richard Kennedy <rkennedy@vcu.edu>
-Depends: R (>= 1.8.0), affy
+Depends: R (>= 1.8.0), affy, affyio
 Description: This package contains an implementation of the S-Score algorithm as described by Zhang et al (2002).
 License: GPL version 2 or newer
 URL: http://home.att.net/~richard-kennedy/professional.html
