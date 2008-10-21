@@ -6,7 +6,7 @@
 }
 \usage{
 SScoreBatch(afbatch = stop("No CEL files specified"), compare = stop("No list of comparisons given"), 
-            SF = NULL, SDT = NULL, rm.outliers = TRUE, rm.mask = TRUE, rm.extra = TRUE, 
+            SF = NULL, SDT = NULL, rm.outliers = TRUE, rm.mask = TRUE, rm.extra = NULL, 
             digits = NULL, verbose = FALSE, celfile.path = NULL, celfile.names = NULL)
 }
 \arguments{
