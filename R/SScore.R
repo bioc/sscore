@@ -1,6 +1,6 @@
 SScore <- function(afbatch = stop("No CEL files specified"), classlabel =
  c(0,1), SF = NULL, SDT = NULL, rm.outliers = TRUE, rm.mask = TRUE,
- rm.extra = TRUE, digits = NULL, verbose = FALSE,celfile.path = NULL, 
+ rm.extra = NULL, digits = NULL, verbose = FALSE,celfile.path = NULL, 
  celfile.names=NULL) {
 
 
@@ -135,6 +135,9 @@ SScore <- function(afbatch = stop("No CEL files specified"), classlabel =
 		stop("Number of filenames does not match number of samples")
 		
 	outlier <- matrix(data=FALSE,nrow=nrow(intensity(afbatch)),ncol=ncol(intensity(afbatch)))
+	if (!is.null(rm.extra)) 
+		rm.outliers <- rm.mask <- rm.extra else
+		rm.extra <- FALSE
 	if (is.null(SF) | is.null(SDT) | rm.outliers | rm.mask | rm.extra) {
 		stdvs <- pixels <- NULL
 		for (i in 1:length(fname)) {
