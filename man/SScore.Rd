@@ -6,7 +6,7 @@
 }
 \usage{
 SScore(afbatch = stop("No CEL files specified"), classlabel = c(0,1), SF = NULL, 
-       SDT = NULL, rm.outliers = TRUE, rm.mask = TRUE, rm.extra = TRUE, 
+       SDT = NULL, rm.outliers = TRUE, rm.mask = TRUE, rm.extra = NULL, 
        digits = NULL, verbose = FALSE, celfile.path = NULL, celfile.names = NULL)
 }
 \arguments{
