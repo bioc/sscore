@@ -10,8 +10,8 @@ computeAffxSFandSDT(afbatch, stdvs, pixels, TGT = 500, digits = NULL, verbose = 
 }
 \arguments{
   \item{afbatch}{ An \code{AffyBatch} object }
-  \item{stdvs} { matrix of standard deviations for probe intensities from *.CEL file }
-  \item{pixels} { matrix of number of pixels for probe intensities from *.CEL file }
+  \item{stdvs}{ matrix of standard deviations for probe intensities from *.CEL file }
+  \item{pixels}{ matrix of number of pixels for probe intensities from *.CEL file }
   \item{TGT}{ the target intensity to which the arrays should be scaled }
   \item{digits}{ number of significant digits for SF and SDT values }
   \item{verbose}{ logical value. If \code{TRUE} it provides more detail of the SF and SDT calculations. }

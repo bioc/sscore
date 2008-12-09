@@ -9,8 +9,8 @@ computeAffxRawQ(intensity, stdvs, pixels, probe.index, probe.zoneID, bgCells, Nu
 }
 \arguments{
   \item{intensity}{ vector of intensities for the GeneChip }
-  \item{stdvs} { matrix of standard deviations for probe intensities from *.CEL file }
-  \item{pixels} { matrix of number of pixels for probe intensities from *.CEL file }
+  \item{stdvs}{ matrix of standard deviations for probe intensities from *.CEL file }
+  \item{pixels}{ matrix of number of pixels for probe intensities from *.CEL file }
   \item{probe.index}{ vector of indices for each probe }
   \item{probe.zoneID}{ vector of zone ID numbers for each probe }
   \item{bgCells}{ number of background cells for the GeneChip }
