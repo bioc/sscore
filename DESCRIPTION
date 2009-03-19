@@ -1,5 +1,5 @@
 Package: sscore
-Version: 1.15.1
+Version: 1.15.2
 Date: 2008-04-09
 Title: S-Score Algorithm for Affymetrix Oligonucleotide Microarrays
 Author: Richard Kennedy <rkennedy@ms.soph.uab.edu>, based on C++
@@ -11,4 +11,4 @@ Suggests: affydata
 Description: This package contains an implementation of the S-Score algorithm as described by Zhang et al (2002).
 License: GPL version 2 or newer
 URL: http://home.att.net/~richard-kennedy/professional.html
-biocViews: Statistics, DifferentialExpression
+biocViews: Bioinformatics, DifferentialExpression
