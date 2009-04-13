@@ -1,0 +1,9 @@
+import(affy)
+
+
+export(
+       computeAffxSFandSDT,
+       computeSFandSDT,
+       SScore,
+       SScoreBatch)
+
